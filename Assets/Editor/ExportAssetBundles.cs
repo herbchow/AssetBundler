@@ -14,29 +14,10 @@ using Object = UnityEngine.Object;
 public class ExportAssetBundles
 {
     private const string AssetsToBundlePath = "Assets/ToBundle";
+    private const string SaveBundleFolder = "Assets/Output/";
+    private const string AssetBundleExtension = ".unity3d";
     private const string SaveBundlePath = "Assets/Output/ShelfAssetBundle.unity3d";
-    private static readonly string _shelfContentPath = "C:/Users/herbert.chow/AppData/LocalLow/iQmetrix/XQ_Shelf/Assets";
     private static readonly string _toBundleFolder = Application.dataPath + "/ToBundle";
-
-    [MenuItem("Assets/Build AssetBundle From Selection - Track dependencies")]
-    private static void ExportResource()
-    {
-        // Bring up save panel
-        var path = EditorUtility.SaveFilePanel("Save Resource", "", "New Resource", "unity3d");
-        if (path.Length != 0)
-        {
-            // Build the resource file from the active selection.
-            var selection = Selection.GetFiltered(typeof (Object), SelectionMode.DeepAssets);
-            // TODO: figure out whether these are paths?
-            // What happens when we drop the files into the project using a script?
-            foreach (var obj in selection)
-            {
-                Debug.Log("Selected " + obj);
-            }
-            BuildPipeline.BuildAssetBundle(Selection.activeObject, selection, path, 0);
-            Selection.objects = selection;
-        }
-    }
 
     private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
     {
@@ -72,10 +53,11 @@ public class ExportAssetBundles
         }
     }
 
-    private static string CopyShelfContent()
+    // TODO: move this out to its own preparation step in worker role
+    private static string CopySourceContent(string sourceContentPath)
     {
         var path = _toBundleFolder;
-        DirectoryCopy(_shelfContentPath, path, false);
+        DirectoryCopy(sourceContentPath, path, false);
         return path;
     }
 
@@ -84,12 +66,29 @@ public class ExportAssetBundles
         BuildPipeline.BuildAssetBundle(assets.First(), assets, SaveBundlePath, 0);
     }
 
-    [MenuItem("Assets/Build Shelf Texture AssetBundle")]
-    private static void BuildShelfTextureAssetBundle()
+    private static void BuildBundlePerAsset(Object[] assets)
     {
-        ImportAssetsInFolder(CopyShelfContent());
+        foreach (var asset in assets)
+        {
+            var bundleFilename = SaveBundleFolder + asset.name + AssetBundleExtension;
+            BuildPipeline.BuildAssetBundle(asset, new[] {asset}, bundleFilename, 0);
+        }
+    }
+
+    [MenuItem("Assets/Build Asset Bundle Per Texture ")]
+    private static void BuildAssetBundlePerTexture()
+    {
+        ImportAssetsInFolder(CopySourceContent(GetSourceFolder()));
         var assets = FindAssets<Texture2D>(AssetsToBundlePath);
-        BuildBundleFromAssets(assets.ToArray());
+        BuildBundlePerAsset(assets.ToArray());
+    }
+
+    private static string GetSourceFolder()
+    {
+        var text = File.ReadAllText(Path.Combine(Application.dataPath, "Config/SourceFolder.txt"));
+        // Read the source folder from a config file
+        Debug.Log("SourceFolder.txt contents: " + text);
+        return text;
     }
 
     private static void ImportAssetsInFolder(string folder)
@@ -124,17 +123,5 @@ public class ExportAssetBundles
             Debug.Log("Printing asset name: " + t);
         }
         return assetList;
-    }
-
-    [MenuItem("Assets/Build AssetBundle From Selection - No dependency tracking")]
-    private static void ExportResourceNoTrack()
-    {
-        // Bring up save panel
-        var path = EditorUtility.SaveFilePanel("Save Resource", "", "New Resource", "unity3d");
-        if (path.Length != 0)
-        {
-            // Build the resource file from the active selection.
-            BuildPipeline.BuildAssetBundle(Selection.activeObject, Selection.objects, path);
-        }
     }
 }
