@@ -14,10 +14,10 @@ using Object = UnityEngine.Object;
 public class ExportAssetBundles
 {
     private const string AssetsToBundlePath = "Assets/ToBundle";
-    private const string SaveBundleFolder = "Assets/Output/";
+    private const string Output = "Assets/Output/";
     private const string AssetBundleExtension = ".unity3d";
-    private const string SaveBundlePath = "Assets/Output/ShelfAssetBundle.unity3d";
-    private static readonly string _toBundleFolder = Application.dataPath + "/ToBundle";
+    private static readonly string AbsoluteToBundlePath = Application.dataPath + "/ToBundle";
+    private const string ConfigSourcefolderTxt = "Config/SourceFolder.txt";
 
     private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
     {
@@ -40,6 +40,7 @@ public class ExportAssetBundles
         foreach (var file in files)
         {
             var temppath = Path.Combine(destDirName, file.Name);
+            Debug.Log("Copying file to " + temppath);
             file.CopyTo(temppath, false);
         }
         // If copying subdirectories, copy them and their contents to new location. 
@@ -56,21 +57,16 @@ public class ExportAssetBundles
     // TODO: move this out to its own preparation step in worker role
     private static string CopySourceContent(string sourceContentPath)
     {
-        var path = _toBundleFolder;
+        var path = AbsoluteToBundlePath;
         DirectoryCopy(sourceContentPath, path, false);
         return path;
-    }
-
-    private static void BuildBundleFromAssets(Object[] assets)
-    {
-        BuildPipeline.BuildAssetBundle(assets.First(), assets, SaveBundlePath, 0);
     }
 
     private static void BuildBundlePerAsset(Object[] assets)
     {
         foreach (var asset in assets)
         {
-            var bundleFilename = SaveBundleFolder + asset.name + AssetBundleExtension;
+            var bundleFilename = Output + asset.name + AssetBundleExtension;
             BuildPipeline.BuildAssetBundle(asset, new[] {asset}, bundleFilename, 0);
         }
     }
@@ -85,7 +81,7 @@ public class ExportAssetBundles
 
     private static string GetSourceFolder()
     {
-        var text = File.ReadAllText(Path.Combine(Application.dataPath, "Config/SourceFolder.txt"));
+        var text = File.ReadAllText(Path.Combine(Application.dataPath, ConfigSourcefolderTxt));
         // Read the source folder from a config file
         Debug.Log("SourceFolder.txt contents: " + text);
         return text;
@@ -95,6 +91,10 @@ public class ExportAssetBundles
     {
         var info = new DirectoryInfo(folder);
         var fileInfo = info.GetFiles();
+        if (fileInfo.Length <= 0)
+        {
+            Debug.Log("No files to convert from " + folder + " exiting");
+        }
         foreach (var file in fileInfo)
         {
             var importAssetPath = "Assets/ToBundle/" + file.Name;
@@ -120,7 +120,7 @@ public class ExportAssetBundles
             {
                 assetList.Add(t);
             }
-            Debug.Log("Printing asset name: " + t);
+            Debug.Log("Found asset name: " + t);
         }
         return assetList;
     }
