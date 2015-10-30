@@ -7,6 +7,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using AssetBundlerSupport;
+using Assets.Editor;
+using Assets.Editor.TextureImportSettings;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -19,46 +22,11 @@ public class ExportAssetBundles
     private static readonly string AbsoluteToBundlePath = Application.dataPath + "/ToBundle";
     private const string ConfigSourcefolderTxt = "Config/SourceFolder.txt";
 
-    private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
-    {
-        // Get the subdirectories for the specified directory.
-        var dir = new DirectoryInfo(sourceDirName);
-        var dirs = dir.GetDirectories();
-        if (!dir.Exists)
-        {
-            throw new DirectoryNotFoundException(
-                "Source directory does not exist or could not be found: "
-                + sourceDirName);
-        }
-        // If the destination directory doesn't exist, create it. 
-        if (!Directory.Exists(destDirName))
-        {
-            Directory.CreateDirectory(destDirName);
-        }
-        // Get the files in the directory and copy them to the new location.
-        var files = dir.GetFiles();
-        foreach (var file in files)
-        {
-            var temppath = Path.Combine(destDirName, file.Name);
-            Debug.Log("Copying file to " + temppath);
-            file.CopyTo(temppath, false);
-        }
-        // If copying subdirectories, copy them and their contents to new location. 
-        if (copySubDirs)
-        {
-            foreach (var subdir in dirs)
-            {
-                var temppath = Path.Combine(destDirName, subdir.Name);
-                DirectoryCopy(subdir.FullName, temppath, copySubDirs);
-            }
-        }
-    }
-
-    // TODO: move this out to its own preparation step in worker role
     private static string CopySourceContent(string sourceContentPath)
     {
+        var fileUtils = new FileUtils(new AssetBundlerLogger());
         var path = AbsoluteToBundlePath;
-        DirectoryCopy(sourceContentPath, path, false);
+        fileUtils.DirectoryCopy(sourceContentPath, path, true);
         return path;
     }
 
@@ -67,7 +35,7 @@ public class ExportAssetBundles
         foreach (var asset in assets)
         {
             var bundleFilename = Output + asset.name + AssetBundleExtension;
-            BuildPipeline.BuildAssetBundle(asset, new[] {asset}, bundleFilename, 0);
+            BuildPipeline.BuildAssetBundle(asset, new[] {asset}, bundleFilename);
         }
     }
 
@@ -76,6 +44,17 @@ public class ExportAssetBundles
     {
         ImportAssetsInFolder(CopySourceContent(GetSourceFolder()));
         var assets = FindAssets<Texture2D>(AssetsToBundlePath);
+        ShelfTextureImportParams.BeginBatch();
+        foreach (var asset in assets)
+        {
+            ShelfTextureImportParams.Begin((Texture2D)asset)
+                                    .SetMaxSize(512)
+                                    .SetNonPowerOfTwoScale(TextureImporterNPOTScale.ToLarger)
+                                    .MipMaps(true)
+                                    .SetFilterMode(FilterMode.Trilinear)
+                                    .End();
+        }
+        ShelfTextureImportParams.EndBatch();
         BuildBundlePerAsset(assets.ToArray());
     }
 
