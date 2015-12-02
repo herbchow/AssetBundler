@@ -90,7 +90,7 @@ public class ExportAssetBundles
         {
             var assetPath = AssetDatabase.GUIDToAssetPath(guid);
             Debug.Log(assetPath);
-            var t = Resources.LoadAssetAtPath(assetPath, typeof (T));
+            var t = AssetDatabase.LoadAssetAtPath(assetPath, typeof (T));
             if (t == null)
             {
                 throw new InvalidOperationException(assetPath + " is not of type " + typeof (T));

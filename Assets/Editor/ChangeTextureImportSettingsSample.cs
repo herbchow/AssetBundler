@@ -438,17 +438,17 @@ public class ChangeTextureImportSettings : ScriptableObject
 
     //--- ChangeTextureFormat. FlashPlayer
 
-    [MenuItem("HelpTools/Texture import settings/Change Texture Format/FlashPlayer/RGB JPG Compressed")]
-    static void ChangeTextureFormat_FlashPlayer_ATF_RGB_JPG()
-    {
-        ChangeTextureFormat(TextureImporterFormat.ATF_RGB_JPG, Platform.FlashPlayer);
-    }
+    //[MenuItem("HelpTools/Texture import settings/Change Texture Format/FlashPlayer/RGB JPG Compressed")]
+    //static void ChangeTextureFormat_FlashPlayer_ATF_RGB_JPG()
+    //{
+    //    ChangeTextureFormat(TextureImporterFormat.ATF_RGB_JPG, Platform.FlashPlayer);
+    //}
 
-    [MenuItem("HelpTools/Texture import settings/Change Texture Format/FlashPlayer/RGBA JPG Compressed")]
-    static void ChangeTextureFormat_FlashPlayer_ATF_RGBA_JPG()
-    {
-        ChangeTextureFormat(TextureImporterFormat.ATF_RGBA_JPG, Platform.FlashPlayer);
-    }
+    //[MenuItem("HelpTools/Texture import settings/Change Texture Format/FlashPlayer/RGBA JPG Compressed")]
+    //static void ChangeTextureFormat_FlashPlayer_ATF_RGBA_JPG()
+    //{
+    //    ChangeTextureFormat(TextureImporterFormat.ATF_RGBA_JPG, Platform.FlashPlayer);
+    //}
 
     [MenuItem("HelpTools/Texture import settings/Change Texture Format/FlashPlayer/RGB 24 bit")]
     static void ChangeTextureFormat_FlashPlayer_RGB24()
