@@ -35,7 +35,7 @@ public class ExportAssetBundles
         foreach (var asset in assets)
         {
             var bundleFilename = Output + asset.name + AssetBundleExtension;
-            BuildPipeline.BuildAssetBundle(asset, new[] {asset}, bundleFilename);
+            BuildPipeline.BuildAssetBundle(asset, new[] { asset }, bundleFilename, BuildAssetBundleOptions.UncompressedAssetBundle);
         }
     }
 
