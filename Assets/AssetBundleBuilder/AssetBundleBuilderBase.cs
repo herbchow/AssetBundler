@@ -1,17 +1,18 @@
-﻿using UnityEngine;
+﻿using AssetPipeline.DataModels;
+using UnityEngine;
 
 namespace Assets.AssetBundleBuilder
 {
-    public abstract class AssetBundleBuilderBase : IAssetBundleBuilder
+    public abstract class AssetBundleBuilderBase
     {
+        protected CompressionType DesiredCompressionType { get; set; }
         protected const string RelativeOutputAssetPath = "Assets/Output/";
         protected const string AssetBundleExtension = ".unity3d";
-        public abstract void BuildBundlePerAsset(Object[] assets);
+        public abstract void BuildBundlePerAsset(Object[] assets, CompressionType compression);
 
-        protected string GenerateBundleFileName(Object asset)
+        public string GenerateBundleFileName(Object asset, CompressionType type)
         {
-            var bundleFilename = asset.name + AssetBundleExtension;
-            return bundleFilename;
+            return asset.name + "_" + AssetBundleExtension;
         }
     }
 }

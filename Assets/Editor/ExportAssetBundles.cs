@@ -8,7 +8,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AssetBundlerSupport;
+using AssetPipeline.DataModels;
 using Assets.AssetBundleBuilder;
+using Assets.CommandLine;
 using Assets.Editor;
 using Assets.Editor.TextureImportSettings;
 using UnityEditor;
@@ -46,7 +48,13 @@ public class ExportAssetBundles
         }
         ShelfTextureImportParams.EndBatch();
         var builder = new Unity5AssetBundleBuilder();
-        builder.BuildBundlePerAsset(assets.ToArray());
+        var commandLineArguments = new AssetBundlerCommandLineArguments();
+        var compressionRequested = commandLineArguments.ParseCompression();
+        if (compressionRequested == CompressionType.Invalid)
+        {
+            throw new ArgumentException("Did you pass command line argument -Compression CompressionType ?");
+        }
+        builder.BuildBundlePerAsset(assets.ToArray(), compressionRequested);
     }
 
     private static string GetSourceFolder()
@@ -90,7 +98,7 @@ public class ExportAssetBundles
             {
                 assetList.Add(t);
             }
-            Debug.Log("Found asset name: " + t);
+            Debug.Log("Found asset name: " + t + " path " + assetPath);
         }
         return assetList;
     }
