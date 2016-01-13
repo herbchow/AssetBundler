@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AssetBundlerSupport;
+using Assets.AssetBundleBuilder;
 using Assets.Editor;
 using Assets.Editor.TextureImportSettings;
 using UnityEditor;
@@ -17,8 +18,6 @@ using Object = UnityEngine.Object;
 public class ExportAssetBundles
 {
     private const string AssetsToBundlePath = "Assets/ToBundle";
-    private const string Output = "Assets/Output/";
-    private const string AssetBundleExtension = ".unity3d";
     private static readonly string AbsoluteToBundlePath = Application.dataPath + "/ToBundle";
     private const string ConfigSourcefolderTxt = "Config/SourceFolder.txt";
 
@@ -30,15 +29,6 @@ public class ExportAssetBundles
         return path;
     }
 
-    private static void BuildBundlePerAsset(Object[] assets)
-    {
-        foreach (var asset in assets)
-        {
-            var bundleFilename = Output + asset.name + AssetBundleExtension;
-            BuildPipeline.BuildAssetBundle(asset, new[] { asset }, bundleFilename, BuildAssetBundleOptions.UncompressedAssetBundle);
-        }
-    }
-
     [MenuItem("Assets/Build Asset Bundle Per Texture ")]
     private static void BuildAssetBundlePerTexture()
     {
@@ -47,7 +37,7 @@ public class ExportAssetBundles
         ShelfTextureImportParams.BeginBatch();
         foreach (var asset in assets)
         {
-            ShelfTextureImportParams.Begin((Texture2D)asset)
+            ShelfTextureImportParams.Begin((Texture2D) asset)
                                     .SetMaxSize(512)
                                     .SetNonPowerOfTwoScale(TextureImporterNPOTScale.ToLarger)
                                     .MipMaps(true)
@@ -55,7 +45,8 @@ public class ExportAssetBundles
                                     .End();
         }
         ShelfTextureImportParams.EndBatch();
-        BuildBundlePerAsset(assets.ToArray());
+        var builder = new Unity5AssetBundleBuilder();
+        builder.BuildBundlePerAsset(assets.ToArray());
     }
 
     private static string GetSourceFolder()
