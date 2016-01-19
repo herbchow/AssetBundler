@@ -34,13 +34,24 @@ public class ExportAssetBundles
     [MenuItem("Assets/Build Asset Bundle Per Texture ")]
     private static void BuildAssetBundlePerTexture()
     {
+        var commandLineArguments = new AssetBundlerCommandLineArguments();
+        var compressionRequested = commandLineArguments.ParseCompression();
+        if (compressionRequested == CompressionType.Invalid)
+        {
+            throw new ArgumentException("Did you pass command line argument -Compression CompressionType ?");
+        }
+        BuildAssetBundlePerTextureHelper(compressionRequested);
+    }
+
+    private static void BuildAssetBundlePerTextureHelper(CompressionType type)
+    {
         ImportAssetsInFolder(CopySourceContent(GetSourceFolder()));
         var assets = FindAssets<Texture2D>(AssetsToBundlePath);
         ShelfTextureImportParams.BeginBatch();
         foreach (var asset in assets)
         {
             ShelfTextureImportParams.Begin((Texture2D) asset)
-                                    .SetMaxSize(512)
+                                    .SetMaxSize(1024)
                                     .SetNonPowerOfTwoScale(TextureImporterNPOTScale.ToLarger)
                                     .MipMaps(true)
                                     .SetFilterMode(FilterMode.Trilinear)
@@ -48,13 +59,19 @@ public class ExportAssetBundles
         }
         ShelfTextureImportParams.EndBatch();
         var builder = new Unity5AssetBundleBuilder();
-        var commandLineArguments = new AssetBundlerCommandLineArguments();
-        var compressionRequested = commandLineArguments.ParseCompression();
-        if (compressionRequested == CompressionType.Invalid)
-        {
-            throw new ArgumentException("Did you pass command line argument -Compression CompressionType ?");
-        }
-        builder.BuildBundlePerAsset(assets.ToArray(), compressionRequested);
+        builder.BuildBundlePerAsset(assets.ToArray(), type);
+    }
+
+    [MenuItem("Assets/Build Asset Bundle Per Texture Dxt ")]
+    private static void BuildAssetBundlePerTextureDxt()
+    {
+        BuildAssetBundlePerTextureHelper(CompressionType.Dxt);
+    }
+
+    [MenuItem("Assets/Build Asset Bundle Per Texture Dxt Uncompressed ")]
+    private static void BuildAssetBundlePerTextureDxtUncompressed()
+    {
+        BuildAssetBundlePerTextureHelper(CompressionType.DxtNoBundleCompression);
     }
 
     private static string GetSourceFolder()

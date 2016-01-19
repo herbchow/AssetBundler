@@ -1,4 +1,5 @@
 ﻿using AssetPipeline.DataModels;
+using UnityEditorInternal;
 using UnityEngine;
 
 namespace Assets.AssetBundleBuilder
@@ -12,7 +13,14 @@ namespace Assets.AssetBundleBuilder
 
         public string GenerateBundleFileName(Object asset, CompressionType type)
         {
-            return asset.name + "_" + AssetBundleExtension;
+            if (!InternalEditorUtility.inBatchMode) // Editor debug mode
+            {
+                return string.Format("{0}_{1}{2}", asset.name, type, AssetBundleExtension);
+            }
+            else
+            {
+                return string.Format("{0}{1}", asset.name, AssetBundleExtension);
+            }
         }
     }
 }
