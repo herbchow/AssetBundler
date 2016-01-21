@@ -1,76 +1,93 @@
-﻿// C# Example
-// Builds an asset bundle from the selected objects in the project view.
-// Once compiled go to "Menu" -> "Assets" and select one of the choices
-// to build the Asset Bundle
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using AssetBundlerSupport;
 using AssetPipeline.DataModels;
 using Assets.AssetBundleBuilder;
-using Assets.CommandLine;
-using Assets.Editor;
-using Assets.Editor.TextureImportSettings;
+using Assets.BatchTextureImporter;
+using Assets.CompressionSettings;
+using Assets.Logger;
+using TinyIoC;
 using UnityEditor;
 using UnityEngine;
+using UnityProjectSupport;
+using UnityProjectSupport.CommandLine;
+using UnityProjectSupport.File;
 using Object = UnityEngine.Object;
 
 public class ExportAssetBundles
 {
     private const string AssetsToBundlePath = "Assets/ToBundle";
     private static readonly string AbsoluteToBundlePath = Application.dataPath + "/ToBundle";
+    private static TinyIoCContainer _container;
     private const string ConfigSourcefolderTxt = "Config/SourceFolder.txt";
 
     private static string CopySourceContent(string sourceContentPath)
     {
-        var fileUtils = new FileUtils(new AssetBundlerLogger());
         var path = AbsoluteToBundlePath;
-        fileUtils.DirectoryCopy(sourceContentPath, path, true);
+        _container.Resolve<IFileUtils>().DirectoryCopy(sourceContentPath, path, true);
         return path;
     }
 
-    [MenuItem("Assets/Build Asset Bundle Per Texture ")]
-    private static void BuildAssetBundlePerTexture()
+    public static void BuildAssetBundleFromTexture()
     {
-        var commandLineArguments = new AssetBundlerCommandLineArguments();
-        var compressionRequested = commandLineArguments.ParseCompression();
+        _container = Bootstrap();
+        var argsParser = _container.Resolve<ICommandLineArgumentsParser>();
+        var compressionRequested = argsParser.ParseCompression();
         if (compressionRequested == CompressionType.Invalid)
         {
             throw new ArgumentException("Did you pass command line argument -Compression CompressionType ?");
         }
-        BuildAssetBundlePerTextureHelper(compressionRequested);
+        var outputFileName = argsParser.ParseOutputAppFileName();
+        if (string.IsNullOrEmpty(outputFileName))
+        {
+            throw new ArgumentException("Please specify an output file name");
+        }
+        BuildSingleAssetBundleFromTexture(compressionRequested, outputFileName);
     }
 
-    private static void BuildAssetBundlePerTextureHelper(CompressionType type)
+    private static TinyIoCContainer Bootstrap()
+    {
+        var container = TinyIoCContainer.Current;
+        container.Register<IFileUtils, FileUtils>();
+        container.Register<IAssetBundlerLogger, AssetBundlerLogger>();
+        container.Register<IBatchTextureImporter, BatchTextureImporter>();
+        container.Register<ICompressionSettings, CompressionSettings>();
+        container.Register<IAssetBundleBuilder, Unity5AssetBundleBuilder>();
+        return container;
+    }
+
+    private static void BuildSingleAssetBundleFromTexture(CompressionType compression, string outputFileName)
     {
         ImportAssetsInFolder(CopySourceContent(GetSourceFolder()));
         var assets = FindAssets<Texture2D>(AssetsToBundlePath);
-        ShelfTextureImportParams.BeginBatch();
+        _container.Resolve<IBatchTextureImporter>().Import(assets, compression);
+        _container.Resolve<IAssetBundleBuilder>().Build(assets.First(), compression, outputFileName);
+    }
+
+    private static void BuildAssetBundlePerTextureHelper(CompressionType compression)
+    {
+        ImportAssetsInFolder(CopySourceContent(GetSourceFolder()));
+        var assets = FindAssets<Texture2D>(AssetsToBundlePath);
+        _container.Resolve<IBatchTextureImporter>().Import(assets, compression);
+        var builder = _container.Resolve<IAssetBundleBuilder>();
         foreach (var asset in assets)
         {
-            ShelfTextureImportParams.Begin((Texture2D) asset)
-                                    .SetMaxSize(1024)
-                                    .SetNonPowerOfTwoScale(TextureImporterNPOTScale.ToLarger)
-                                    .MipMaps(true)
-                                    .SetFilterMode(FilterMode.Trilinear)
-                                    .End();
+            builder.Build(asset, compression, string.Format("{0}.{1}", asset.name, compression));
         }
-        ShelfTextureImportParams.EndBatch();
-        var builder = new Unity5AssetBundleBuilder();
-        builder.BuildBundlePerAsset(assets.ToArray(), type);
     }
 
     [MenuItem("Assets/Build Asset Bundle Per Texture Dxt ")]
     private static void BuildAssetBundlePerTextureDxt()
     {
+        _container = Bootstrap();
         BuildAssetBundlePerTextureHelper(CompressionType.Dxt);
     }
 
     [MenuItem("Assets/Build Asset Bundle Per Texture Dxt Uncompressed ")]
     private static void BuildAssetBundlePerTextureDxtUncompressed()
     {
+        _container = Bootstrap();
         BuildAssetBundlePerTextureHelper(CompressionType.DxtNoBundleCompression);
     }
 

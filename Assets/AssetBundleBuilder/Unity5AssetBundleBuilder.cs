@@ -5,28 +5,9 @@ using UnityEngine;
 
 namespace Assets.AssetBundleBuilder
 {
-    public class Unity5AssetBundleBuilder : AssetBundleBuilderBase
+    public class Unity5AssetBundleBuilder : IAssetBundleBuilder
     {
-        public override void BuildBundlePerAsset(Object[] assets, CompressionType type)
-        {
-            var buildList = new List<AssetBundleBuild>();
-            foreach (var asset in assets)
-            {
-                Debug.Log("Building asset bundle for " + AssetDatabase.GetAssetPath(asset));
-                buildList.Add(new AssetBundleBuild
-                    {
-                        assetBundleName = GenerateBundleFileName(asset, type),
-                        assetNames =
-                            new[]
-                                {
-                                    AssetDatabase.GetAssetPath(asset)
-                                },
-                    });
-            }
-            BuildPipeline.BuildAssetBundles("Assets/Output/",
-                                            buildList.ToArray(),
-                                            GetBuildOptions(type));
-        }
+        protected const string RelativeOutputAssetPath = "Assets/Output/";
 
         private BuildAssetBundleOptions GetBuildOptions(CompressionType type)
         {
@@ -40,6 +21,24 @@ namespace Assets.AssetBundleBuilder
                     break;
             }
             return options;
+        }
+
+        public void Build(Object asset, CompressionType compression, string outputFileName)
+        {
+            var buildList = new List<AssetBundleBuild>();
+            Debug.Log("Building asset bundle for " + AssetDatabase.GetAssetPath(asset));
+            buildList.Add(new AssetBundleBuild
+                {
+                    assetBundleName = outputFileName,
+                    assetNames =
+                        new[]
+                            {
+                                AssetDatabase.GetAssetPath(asset)
+                            },
+                });
+            BuildPipeline.BuildAssetBundles(RelativeOutputAssetPath,
+                                            buildList.ToArray(),
+                                            GetBuildOptions(compression));
         }
     }
 }
