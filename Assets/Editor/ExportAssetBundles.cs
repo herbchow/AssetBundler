@@ -49,6 +49,9 @@ public class ExportAssetBundles
     private static TinyIoCContainer Bootstrap()
     {
         var container = TinyIoCContainer.Current;
+        container.Register<ICommandLineArgumentsParser, CommandLineArgumentsParser>();
+        container.Register<ICommandLineArgumentsProvider, UnityCommandLineArgumentsProvider>();
+
         container.Register<IFileUtils, FileUtils>();
         container.Register<IAssetBundlerLogger, AssetBundlerLogger>();
         container.Register<IBatchTextureImporter, BatchTextureImporter>();
