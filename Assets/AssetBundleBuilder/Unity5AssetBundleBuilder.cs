@@ -12,14 +12,7 @@ namespace Assets.AssetBundleBuilder
         private BuildAssetBundleOptions GetBuildOptions(CompressionType type)
         {
             var options = BuildAssetBundleOptions.None;
-            switch (type)
-            {
-                case CompressionType.Dxt:
-                    break;
-                case CompressionType.DxtNoBundleCompression:
-                    options = options | BuildAssetBundleOptions.UncompressedAssetBundle;
-                    break;
-            }
+            options = options | BuildAssetBundleOptions.UncompressedAssetBundle;
             return options;
         }
 

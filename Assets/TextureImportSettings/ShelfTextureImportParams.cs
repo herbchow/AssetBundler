@@ -1,4 +1,6 @@
-﻿using UnityEditor;
+﻿using AssetPipeline.DataModels;
+using Assets.CompressionSettings;
+using UnityEditor;
 using UnityEngine;
 
 namespace Assets.Editor.TextureImportSettings
@@ -67,6 +69,46 @@ namespace Assets.Editor.TextureImportSettings
         public ShelfTextureImportParams SetFilterMode(FilterMode mode)
         {
             _textureImporter.filterMode = mode;
+            return this;
+        }
+
+        public ShelfTextureImportParams SetTextureFormatAuto(CompressionType type)
+        {
+            switch (type)
+            {
+                case CompressionType.Dxt:
+                case CompressionType.Dxt_2K:
+                    if (_textureImporter.DoesSourceTextureHaveAlpha())
+                    {
+                        _textureImporter.textureFormat = TextureImporterFormat.DXT5;
+                    }
+                    else
+                    {
+                        _textureImporter.textureFormat = TextureImporterFormat.DXT1;
+                    }
+                    break;
+
+            }
+            return this;
+        }
+
+        public ShelfTextureImportParams SetTextureFormat(ImporterSettings settings)
+        {
+            if (settings.AutoTransparencyFormat)
+            {
+                if (_textureImporter.DoesSourceTextureHaveAlpha())
+                {
+                    _textureImporter.textureFormat = TextureImporterFormat.DXT5;
+                }
+                else
+                {
+                    _textureImporter.textureFormat = TextureImporterFormat.DXT1;
+                }
+            }
+            else
+            {
+                _textureImporter.textureFormat = settings.CompressionFormat;
+            }
             return this;
         }
     }

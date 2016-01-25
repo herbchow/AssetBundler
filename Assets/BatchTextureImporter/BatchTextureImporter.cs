@@ -27,6 +27,7 @@ namespace Assets.BatchTextureImporter
                                         .SetNonPowerOfTwoScale(TextureImporterNPOTScale.ToLarger)
                                         .MipMaps(true)
                                         .SetFilterMode(FilterMode.Trilinear)
+                                        .SetTextureFormat(settings)
                                         .End();
             }
             ShelfTextureImportParams.EndBatch();

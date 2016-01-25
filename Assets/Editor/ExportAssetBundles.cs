@@ -51,7 +51,6 @@ public class ExportAssetBundles
         var container = TinyIoCContainer.Current;
         container.Register<ICommandLineArgumentsParser, CommandLineArgumentsParser>();
         container.Register<ICommandLineArgumentsProvider, UnityCommandLineArgumentsProvider>();
-
         container.Register<IFileUtils, FileUtils>();
         container.Register<IAssetBundlerLogger, AssetBundlerLogger>();
         container.Register<IBatchTextureImporter, BatchTextureImporter>();
@@ -76,22 +75,32 @@ public class ExportAssetBundles
         var builder = _container.Resolve<IAssetBundleBuilder>();
         foreach (var asset in assets)
         {
-            builder.Build(asset, compression, string.Format("{0}.{1}", asset.name, compression));
+            builder.Build(asset,
+                          compression,
+                          string.Format("{0}.{1}", asset.name, ImageCompressionHelpers.GetExtension(compression)));
         }
     }
 
-    [MenuItem("Assets/Build Asset Bundle Per Texture Dxt ")]
-    private static void BuildAssetBundlePerTextureDxt()
+
+    [MenuItem("Assets/Build Asset Bundle Per Texture Auto Dxt ")]
+    private static void BuildAssetBundlePerTextureAutoDxt()
     {
         _container = Bootstrap();
         BuildAssetBundlePerTextureHelper(CompressionType.Dxt);
     }
 
-    [MenuItem("Assets/Build Asset Bundle Per Texture Dxt Uncompressed ")]
-    private static void BuildAssetBundlePerTextureDxtUncompressed()
+    [MenuItem("Assets/Build Asset Bundle Per Texture Force Dxt1 ")]
+    private static void BuildAssetBundlePerTextureDxt1()
     {
         _container = Bootstrap();
-        BuildAssetBundlePerTextureHelper(CompressionType.DxtNoBundleCompression);
+        BuildAssetBundlePerTextureHelper(CompressionType.Dxt1);
+    }
+
+    [MenuItem("Assets/Build Asset Bundle Per Texture Force Dxt5 ")]
+    private static void BuildAssetBundlePerTextureDxt5()
+    {
+        _container = Bootstrap();
+        BuildAssetBundlePerTextureHelper(CompressionType.Dxt5);
     }
 
     private static string GetSourceFolder()
