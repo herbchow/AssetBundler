@@ -2,7 +2,6 @@
 using AssetPipeline.DataModels;
 using Assets.CompressionSettings;
 using Assets.Editor.TextureImportSettings;
-using UnityEditor;
 using UnityEngine;
 
 namespace Assets.BatchTextureImporter
@@ -18,14 +17,15 @@ namespace Assets.BatchTextureImporter
 
         public void Import(IList<Object> assets, CompressionType type)
         {
-            var settings = _settings.Get(type);
+
             ShelfTextureImportParams.BeginBatch();
             foreach (var asset in assets)
             {
+                var settings = _settings.Get(type, (Texture2D) asset);
                 ShelfTextureImportParams.Begin((Texture2D) asset)
-                                        .SetMaxSize(settings.MaxPowerOfTwoSize)
-                                        .SetNonPowerOfTwoScale(TextureImporterNPOTScale.ToLarger)
-                                        .MipMaps(true)
+                                        .SetMaxSize(settings.MaxSize)
+                                        .SetNonPowerOfTwoScale(settings.NPotScale)
+                                        .MipMaps(settings.MipMapEnabled)
                                         .SetFilterMode(FilterMode.Trilinear)
                                         .SetTextureFormat(settings)
                                         .End();

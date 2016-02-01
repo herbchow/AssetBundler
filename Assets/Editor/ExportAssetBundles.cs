@@ -103,6 +103,20 @@ public class ExportAssetBundles
         BuildAssetBundlePerTextureHelper(CompressionType.Dxt5);
     }
 
+    [MenuItem("Assets/Build Asset Bundle Per Texture Noesis Lifestyle Features")]
+    private static void BuildAssetBundlePerTextureNoesisLifestyleFeatures()
+    {
+        _container = Bootstrap();
+        BuildAssetBundlePerTextureHelper(CompressionType.NoesisLifestyleFeatures);
+    }
+
+    [MenuItem("Assets/Build Asset Bundle Per Texture Shelf Heroshot")]
+    private static void BuildAssetBundlePerTextureShelfHeroshot()
+    {
+        _container = Bootstrap();
+        BuildAssetBundlePerTextureHelper(CompressionType.ShelfHeroshot);
+    }
+
     private static string GetSourceFolder()
     {
         var text = File.ReadAllText(Path.Combine(Application.dataPath, ConfigSourcefolderTxt));
