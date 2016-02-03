@@ -117,6 +117,20 @@ public class ExportAssetBundles
         BuildAssetBundlePerTextureHelper(CompressionType.ShelfHeroshot);
     }
 
+    [MenuItem("Assets/Build Asset Bundle Per Thumbnail 140")]
+    private static void BuildAssetBundlePerTextureThumbnail140()
+    {
+        _container = Bootstrap();
+        BuildAssetBundlePerTextureHelper(CompressionType.Thumbnail140);
+    }
+
+    [MenuItem("Assets/Build Asset Bundle Per Thumbnail 256")]
+    private static void BuildAssetBundlePerTextureThumbnail256()
+    {
+        _container = Bootstrap();
+        BuildAssetBundlePerTextureHelper(CompressionType.Thumbnail256);
+    }
+
     private static string GetSourceFolder()
     {
         var text = File.ReadAllText(Path.Combine(Application.dataPath, ConfigSourcefolderTxt));

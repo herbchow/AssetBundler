@@ -30,7 +30,12 @@ namespace Assets.CompressionSettings
             {
                 case CompressionType.NoesisLifestyleFeatures:
                 case CompressionType.FilterTest:
+                case CompressionType.Thumbnail140:
+                case CompressionType.Thumbnail256:
                     settings.NPotScale = TextureImporterNPOTScale.None;
+                    break;
+                case CompressionType.ShelfHeroshot:
+                    settings.NPotScale = TextureImporterNPOTScale.ToLarger;
                     break;
                 default:
                     settings.NPotScale = TextureImporterNPOTScale.ToLarger;
@@ -51,7 +56,8 @@ namespace Assets.CompressionSettings
         private bool AutoDetectFormat(CompressionType compression)
         {
             return compression == CompressionType.Dxt || compression == CompressionType.Dxt_2K ||
-                   compression == CompressionType.ShelfHeroshot;
+                   compression == CompressionType.ShelfHeroshot || compression == CompressionType.Thumbnail140 ||
+                   compression == CompressionType.Thumbnail256;
         }
 
         private void SetTiFormat(CompressionType compression, ImporterSettings settings)
@@ -88,11 +94,13 @@ namespace Assets.CompressionSettings
                 case CompressionType.Dxt_2K:
                 case CompressionType.Dxt1_2K:
                 case CompressionType.Dxt5_2K:
-                    settings.MaxSize = 1024*2;
-                    break;
                 case CompressionType.NoesisLifestyleFeatures:
                 case CompressionType.FilterTest:
                     settings.MaxSize = 1024*2;
+                    break;
+                case CompressionType.Thumbnail140:
+                case CompressionType.Thumbnail256:
+                    settings.MaxSize = 256;
                     break;
                 default:
                     throw new NotImplementedException("Please handle format");
