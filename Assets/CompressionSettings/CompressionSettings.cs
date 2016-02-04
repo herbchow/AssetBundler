@@ -35,7 +35,7 @@ namespace Assets.CompressionSettings
                     settings.NPotScale = TextureImporterNPOTScale.None;
                     break;
                 case CompressionType.ShelfHeroshot:
-                    settings.NPotScale = TextureImporterNPOTScale.ToLarger;
+                    settings.NPotScale = TextureImporterNPOTScale.None;
                     break;
                 default:
                     settings.NPotScale = TextureImporterNPOTScale.ToLarger;
