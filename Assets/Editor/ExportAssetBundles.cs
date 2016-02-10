@@ -81,7 +81,6 @@ public class ExportAssetBundles
         }
     }
 
-
     [MenuItem("Assets/Build Asset Bundle Per Texture Auto Dxt ")]
     private static void BuildAssetBundlePerTextureAutoDxt()
     {
@@ -115,6 +114,20 @@ public class ExportAssetBundles
     {
         _container = Bootstrap();
         BuildAssetBundlePerTextureHelper(CompressionType.ShelfHeroshot);
+    }
+
+    [MenuItem("Assets/Build Asset Bundle Per Texture Shelf Heroshot Black and White")]
+    private static void BuildAssetBundlePerTextureShelfHeroshotBlackAndWhite()
+    {
+        _container = Bootstrap();
+        BuildAssetBundlePerTextureHelper(CompressionType.ShelfHeroshotBlackWhite);
+    }
+
+    [MenuItem("Assets/Build Asset Bundle Per Texture Lifestyle Polaroid")]
+    private static void BuildAssetBundlePerTextureLifestylePolaroid()
+    {
+        _container = Bootstrap();
+        BuildAssetBundlePerTextureHelper(CompressionType.LifestylePolaroid);
     }
 
     [MenuItem("Assets/Build Asset Bundle Per Thumbnail 140")]

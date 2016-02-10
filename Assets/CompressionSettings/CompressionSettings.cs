@@ -1,5 +1,4 @@
-﻿using System;
-using AssetPipeline.DataModels;
+﻿using AssetPipeline.DataModels;
 using UnityEditor;
 using UnityEngine;
 
@@ -29,16 +28,17 @@ namespace Assets.CompressionSettings
             switch (compression)
             {
                 case CompressionType.NoesisLifestyleFeatures:
+                case CompressionType.LifestyleGaussianBlur:
+                case CompressionType.LifestylePolaroid:
                 case CompressionType.FilterTest:
                 case CompressionType.Thumbnail140:
                 case CompressionType.Thumbnail256:
-                    settings.NPotScale = TextureImporterNPOTScale.None;
-                    break;
                 case CompressionType.ShelfHeroshot:
+                case CompressionType.ShelfHeroshotBlackWhite:
                     settings.NPotScale = TextureImporterNPOTScale.None;
                     break;
                 default:
-                    settings.NPotScale = TextureImporterNPOTScale.ToLarger;
+                    settings.NPotScale = TextureImporterNPOTScale.None;
                     break;
             }
         }
@@ -57,7 +57,7 @@ namespace Assets.CompressionSettings
         {
             return compression == CompressionType.Dxt || compression == CompressionType.Dxt_2K ||
                    compression == CompressionType.ShelfHeroshot || compression == CompressionType.Thumbnail140 ||
-                   compression == CompressionType.Thumbnail256;
+                   compression == CompressionType.Thumbnail256 || compression == CompressionType.ShelfHeroshotBlackWhite;
         }
 
         private void SetTiFormat(CompressionType compression, ImporterSettings settings)
@@ -74,10 +74,13 @@ namespace Assets.CompressionSettings
                     break;
                 case CompressionType.FilterTest:
                 case CompressionType.NoesisLifestyleFeatures:
+                case CompressionType.LifestyleGaussianBlur:
+                case CompressionType.LifestylePolaroid:
                     settings.CompressionFormat = TextureImporterFormat.DXT1;
                     break;
                 default:
-                    throw new NotImplementedException("Please handle format");
+                    settings.CompressionFormat = TextureImporterFormat.DXT1;
+                    break;
             }
         }
 
@@ -89,6 +92,7 @@ namespace Assets.CompressionSettings
                 case CompressionType.Dxt1:
                 case CompressionType.Dxt5:
                 case CompressionType.ShelfHeroshot:
+                case CompressionType.ShelfHeroshotBlackWhite:
                     settings.MaxSize = 1024;
                     break;
                 case CompressionType.Dxt_2K:
@@ -103,7 +107,8 @@ namespace Assets.CompressionSettings
                     settings.MaxSize = 256;
                     break;
                 default:
-                    throw new NotImplementedException("Please handle format");
+                    settings.MaxSize = 1024*2;
+                    break;
             }
         }
     }
